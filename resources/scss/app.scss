@@ -1,27 +1,35 @@
 @import '~bootstrap/scss/bootstrap';
 
 header{
-    height: 60px;
+    height: 50px;
+    background-color: #212529;
+}
+
+header,
+aside{
+    a{
+        color: #fff !important;
+        text-decoration: none;
+
+        &:hover{
+            text-decoration: underline;
+        }
+    }
+}
+
+ul{
+    list-style: none;
 }
 
 .main-wrapper{
-    height: calc(100vh - 60px);
+    height: calc(100vh - 50px);
 }
 
 aside{
-    width: 200px;
+    width: 250px;
     height: 100%;
+}
 
-    ul{
-        list-style: none;
-
-        a{
-            color: white;
-            text-decoration: none;
-
-            &:hover{
-                text-decoration: underline;
-            }
-        }
-    }
+.main-content{
+    width: calc(100% - 250px);
 }
