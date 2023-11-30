@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Type;
 use Faker\Generator as Faker;
+use App\Http\Functions\Helper;
 
 class TypeTableSeeder extends Seeder
 {
@@ -17,7 +18,7 @@ class TypeTableSeeder extends Seeder
         for($i = 0; $i < 10; $i++){
             $new_type = new Type();
             $new_type->name = $faker->sentence();
-            $new_type->slug = Type::generateSlug($new_type->name);
+            $new_type->slug = Helper::generateSlug($new_type->name, Type::class);
             $new_type->save();
         }
     }

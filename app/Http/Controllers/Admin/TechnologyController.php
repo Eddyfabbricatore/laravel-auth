@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Technology;
 use Illuminate\Support\Str;
+use App\Functions\Helper;
 
 class TechnologyController extends Controller
 {
@@ -66,9 +67,32 @@ class TechnologyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Technology $technology)
     {
-        //
+        // Valido il dato
+        // Controllo se esiste già una tecnologia con lo stesso nome
+        // Genero lo slug
+        // Effettuo l'update
+        // Reinderizzo all'index
+
+        $val_data = $request->validate([
+            'name' => 'required|min:2|max:50'
+        ], [
+            'name.required' => 'Devi inserire il nome della tecnologia',
+            'name.min' => 'Il nome della tecnologia deve avere almeno :min caratteri',
+            'name.max' => 'Il nome della tecnologia non deve avere più di :max caratteri'
+        ]);
+
+        $exists = Technology::where('name', $request->name)->first();
+
+        if($exists){
+            return redirect()->route('admin.technologies.index')->with('error', 'Tecnologia già presente');
+        }
+
+        $val_data['slug'] = Helper::generateSlug($request->name, Technology::class);
+        $technology->update($val_data);
+
+        return redirect()->route('admin.technologies.index')->with('success', 'Tecnologia aggiornata con successo');
     }
 
     /**

@@ -1,6 +1,12 @@
 @extends('layouts.admin')
 
 @section('content')
+    @if(session('success'))
+        <div class="alert alert-danger" role="alert">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <h1 class="mb-5">Elenco Progetti</h1>
 
     <table class="table table-bordered table-striped table-hover mb-5">
@@ -14,7 +20,7 @@
         </thead>
 
         <tbody>
-            @foreach ($projects as $project)
+            @foreach($projects as $project)
                 @php
                     $date = date_create($project->date)
                 @endphp
@@ -27,14 +33,13 @@
                         <a class="btn btn-success me-3"
                         href="{{ route('admin.projects.show', $project) }}">
                         <i class="fa-solid fa-eye"></i></a>
-                        <form
-                            action="{{ route('admin.projects.destroy', $project) }}"
-                            method="POST"
-                            onsubmit="return confirm('Sei sicuro di voler eliminare questo progetto')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-danger" type="submit"><i class="fa-solid fa-trash"></i></button>
-                        </form>
+                        @include('admin.partials.form_delete', [
+                            'route' => route('admin.projects.destroy', $project),
+                            'message' => 'Sei sicuro di voler eliminare questo progetto?'
+                        ])
+                        <a class="btn btn-warning ms-3"
+                        href="{{ route('admin.projects.edit', $project) }}">
+                        <i class="fa-solid fa-pencil"></i></a>
                     </td>
                 </tr>
             @endforeach

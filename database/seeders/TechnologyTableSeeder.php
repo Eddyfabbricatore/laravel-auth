@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Technology;
 use Faker\Generator as Faker;
+use App\Http\Functions\Helper;
 
 class TechnologyTableSeeder extends Seeder
 {
@@ -17,7 +18,7 @@ class TechnologyTableSeeder extends Seeder
         for($i = 0; $i < 10; $i++){
             $new_technology = new Technology();
             $new_technology->name = $faker->sentence();
-            $new_technology->slug = Technology::generateSlug($new_technology->name);
+            $new_technology->slug = Helper::generateSlug($new_technology->name, Technology::class);
             $new_technology->save();
         }
     }

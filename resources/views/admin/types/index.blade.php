@@ -25,7 +25,7 @@
                 </div>
             </form>
 
-            <table class="table mb-5">
+            <table class="table table-bordered table-striped table-hover mb-5">
                 <thead>
                     <tr>
                         <th scope="col">Nome</th>
@@ -37,7 +37,7 @@
                     @foreach ($types as $type)
                         <tr>
                             <td>{{ $type->name }}</td>
-                            <td>
+                            <td class="d-flex">
                                 <form
                                   action="{{ route('admin.types.destroy', $type) }}"
                                   method="POST"

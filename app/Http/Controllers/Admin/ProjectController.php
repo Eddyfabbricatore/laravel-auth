@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Project;
+use App\Http\Requests\ProjectRequest;
+use App\Functions\Helper;
+use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
 {
@@ -22,20 +25,31 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        return view('admin.projects.create');
+        $title = 'Crea un nuovo progetto';
+        $method = 'POST';
+        $route = route('admin.projects.store');
+        $project = null;
+        return view('admin.projects.create-edit', compact('title', 'method', 'route', 'project'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ProjectRequest $request)
     {
         $form_data = $request->all();
 
-        $new_project = new Project();
-        $form_data['slug'] = Project::generateSlug($form_data['name']);
-        $new_project->fill($form_data);
-        $new_project->save();
+        $form_data['slug'] = Helper::generateSlug($form_data['name'], Project::class);
+        // Se esiste la chiave image salvo l'immagine nel filesystem e nel database
+        if(array_key_exists('image', $form_data)){
+            // Prima di salvare il file prendo il nome del file per salvarlo nel db
+            $form_data['image_original_name'] = $request->file('image')->getClientOriginalName();
+
+            // Salvo il file nello storage rinominandolo
+            $form_data['image'] = Storage::put('uploads', $form_data['image']);
+        }
+
+        $new_project = Project::create($form_data);
 
         return redirect()->route('admin.projects.show', $new_project);
     }
@@ -53,17 +67,46 @@ class ProjectController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Project $project)
     {
-        //
+        $title = 'Modifica progetto';
+        $method = 'PUT';
+        $route = route('admin.projects.update', $project);
+        return view('admin.projects.create-edit', compact('title', 'method', 'route', 'project'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(ProjectRequest $request, Project $project)
     {
-        //
+        $form_data = $request->all();
+
+        if($form_data['name'] !== $project->name){
+            $form_data['slug'] = Helper::generateSlug($form_data['name'], Project::class);
+        }else{
+            $form_data['slug'] = $project->slug;
+        }
+
+        if(array_key_exists('image', $form_data)){
+            // Se esiste la chiave image vuol dire che devo sostituire l'immagine presente se esiste eliminando quella vecchia
+            if($project->image){
+                // Se era presente la elimino dallo storage
+                Storage::disk('public')->delete($project->image);
+            }
+
+            // Prima di salvare il file prendo il nome del file per salvarlo nel db
+            $form_data['image_original_name'] = $request->file('image')->getClientOriginalName();
+
+            // Salvo il file nello storage rinominandolo
+            $form_data['image'] = Storage::put('uploads', $form_data['image']);
+        }
+
+        $form_data['date'] = date('Y-m-d');
+
+        $project->update($form_data);
+
+        return redirect()->route('admin.projects.show', $project);
     }
 
     /**
@@ -71,6 +114,11 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        // Se il progetto contiene un immagine la devo eliminare
+        if($project->image){
+            Storage::disk('public')->delete($project->image);
+        }
+
         $project->delete();
         return redirect()->route('admin.projects.index')->with('success', 'Progetto eliminato con successo');
     }

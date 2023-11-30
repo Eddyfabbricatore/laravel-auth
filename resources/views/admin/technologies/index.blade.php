@@ -5,6 +5,16 @@
 
     <div class="row">
         <div class="col">
+            @if($errors->any())
+                <div class="alert alert-danger" role="alert">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             @if(@session('error'))
                 <div class="alert alert-danger" role="alert">
                     {{ session('error') }}
@@ -25,7 +35,7 @@
                 </div>
             </form>
 
-            <table class="table mb-5">
+            <table class="table table-bordered table-striped table-hover mb-5">
                 <thead>
                     <tr>
                         <th scope="col">Nome</th>
@@ -34,18 +44,25 @@
                 </thead>
 
                 <tbody>
-                    @foreach ($technologies as $technology)
+                    @foreach($technologies as $technology)
                         <tr>
-                            <td>{{ $technology->name }}</td>
                             <td>
                                 <form
-                                    action="{{ route('admin.technologies.destroy', $technology) }}"
-                                    method="POST"
-                                    onsubmit="return confirm('Sei sicuro di voler eliminare questa tecnologia')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-danger" type="submit"><i class="fa-solid fa-trash"></i></button>
+                                  action="{{ route('admin.technologies.update', $technology) }}"
+                                  method="POST"
+                                  id="form-edit">
+                                    @csrf
+                                    @method('PUT')
+                                    <input class="form-hidden" type="text" value="{{ $technology->name }}" name="name">
                                 </form>
+                            </td>
+                            <td class="d-flex">
+                                <button class="btn btn-warning me-3" onclick="submitForm()" id="button-addon2"><i class="fa-solid fa-pencil"></i></button>
+
+                                @include('admin.partials.form_delete', [
+                                    'route' => route('admin.technologies.destroy', $technology),
+                                    'message' => 'Sei sicuro di voler eliminare questa tecnologia'
+                                ])
                             </td>
                         </tr>
                     @endforeach
@@ -55,4 +72,11 @@
     </div>
 
     {{ $technologies->links() }}
+
+    <script>
+        function submitForm(){
+            const form = document.getElementById('form-edit');
+            form.submit();
+        }
+    </script>
 @endsection
